@@ -1,0 +1,37 @@
+---
+- name: Create user for graylog service
+  become: true
+  ansible.builtin.user:
+    name: "{{ graylog_service_user }}"
+    create_home: false
+    comment: "{{ graylog_service_user }} user with no shell access"
+    shell: /bin/false
+
+- name: Create config directory for graylog
+  become: true
+  ansible.builtin.file:
+    path: "{{ graylog_service_config_dir }}"
+    state: directory
+    mode: "0755"
+    owner: "{{ graylog_service_user }}"
+    group: "{{ graylog_service_user }}"
+
+- name: Create data directory for graylog
+  become: true
+  ansible.builtin.file:
+    path: "{{ graylog_service_data_dir }}"
+    state: directory
+    mode: "0755"
+    owner: "{{ graylog_service_user }}"
+    group: "{{ graylog_service_user }}"
+
+- name: Add graylog service user to docker group
+  become: true
+  ansible.builtin.user:
+    name: "{{ item }}"
+    groups: docker
+    append: true
+  with_items:
+    - root
+    - noxious
+    - "{{ graylog_service_user }}"

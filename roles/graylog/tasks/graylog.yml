@@ -1,0 +1,60 @@
+---
+- name: Set vm.max_map_count for Opensearch
+  become: true
+  ansible.posix.sysctl:
+    name: vm.max_map_count
+    value: "262144"
+    state: present
+    reload: true
+    sysctl_set: true
+
+- name: Create docker compose config
+  become: true
+  ansible.builtin.template:
+    src: "templates/docker-compose/docker-compose.yml.j2"
+    dest: "{{ graylog_service_config_dir }}/docker-compose.yml"
+    owner: "{{ graylog_service_user }}"
+    group: "{{ graylog_service_user }}"
+    mode: "0644"
+  notify: "Restart {{ graylog_service_name }}"
+
+- name: Create systemd service file
+  become: true
+  ansible.builtin.template:
+    src: "templates/{{ graylog_service_name }}/{{ graylog_service_name }}.service.j2"
+    dest: /etc/systemd/system/{{ graylog_service_name }}.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: "Restart {{ graylog_service_name }}"
+
+- name: Copy graylog configuration files
+  become: true
+  ansible.builtin.copy:
+    src: "files/{{ item }}"
+    dest: "{{ graylog_service_config_dir }}/{{ item }}"
+    mode: "0644"
+  with_items:
+    - graylog.conf
+    - datanode.conf
+  notify: "Restart {{ graylog_service_name }}"
+
+- name: Create graylog .env file
+  become: true
+  ansible.builtin.template:
+    src: templates/docker-compose/graylog.env.j2
+    dest: "{{ graylog_service_config_dir }}/graylog.env"
+    group: "{{ graylog_service_user }}"
+    owner: "{{ graylog_service_user }}"
+    mode: "0400"
+  notify: "Restart {{ graylog_service_name }}"
+
+- name: Create datanode .env file
+  become: true
+  ansible.builtin.template:
+    src: templates/docker-compose/datanode.env.j2
+    dest: "{{ graylog_service_config_dir }}/datanode.env"
+    group: "{{ graylog_service_user }}"
+    owner: "{{ graylog_service_user }}"
+    mode: "0400"
+  notify: "Restart {{ graylog_service_name }}"
