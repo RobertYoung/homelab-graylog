@@ -38,3 +38,8 @@ roles:
     scm: git
     version: v1.3.2
     name: wazuh-agent
+
+  - src: git@github.com:RobertYoung/homelab-ansible-role-certbot.git
+    scm: git
+    version: v1.0.0
+    name: certbot

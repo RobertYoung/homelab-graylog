@@ -1,0 +1,66 @@
+---
+- name: Graylog configuration
+  hosts: graylog
+  vars:
+    hostname: influxdb
+    domain: local.iamrobertyoung.co.uk
+    fqdn: "{{ hostname }}.{{ domain }}"
+  roles:
+    - role: configure-system
+      tags: [configure-system]
+
+    - role: shell
+      tags: [shell]
+      vars:
+        shell_hostname: "{{ hostname }}"
+        shell_user: noxious
+        shell_home_directory: /home/noxious
+
+    - role: shell
+      tags: [shell]
+      vars:
+        shell_hostname: "{{ hostname }}"
+        shell_user: root
+        shell_home_directory: /root
+        shell_show_pretty_info: false
+
+    - role: docker
+      tags: [docker]
+
+    - role: telegraf
+      tags: [telegraf]
+      vars:
+        telegraf_influxdb_url: "https://influxdb.{{ domain }}"
+        telegraf_influxdb_port: 8086
+        telegraf_influxdb_organisation: "0dd8df669872ba9e"
+        telegraf_influxdb_token: "{{ lookup('aws_ssm', '/home-server/influxdb-token', region='eu-west-2') }}"
+        telegraf_influxdb_bucket: "home-server"
+
+    - role: step-ca-client
+      tags: [step-ca-client]
+      vars:
+        step_ca_client_provisioner_password: "{{ lookup('aws_ssm', '/home-server/step-ca-ansible-password', region='eu-west-2') }}"
+
+    - role: wazuh-agent
+      tags: [wazuh-agent]
+
+    - role: certbot
+      tags: [certbot]
+      vars:
+        certbot_domain: "{{ fqdn }}"
+        certbot_aws_access_key: "{{ lookup('aws_ssm', '/home-server/certbot-access-key', region='eu-west-2') }}"
+        certbot_aws_secret_access_key: "{{ lookup('aws_ssm', '/home-server/certbot-secret-access-key', region='eu-west-2') }}"
+        certbot_deploy_hook_script: "../roles/graylog/files/certbot/deploy-hook.sh"
+
+    - role: graylog
+      tags: [graylog]
+      vars:
+        graylog_backup_aws_access_key: "{{ lookup('aws_ssm', '/home-server/access-key', region='eu-west-2') }}"
+        graylog_backup_aws_secret_access_key: "{{ lookup('aws_ssm', '/home-server/secret-access-key', region='eu-west-2') }}"
+        graylog_backup_aws_region: eu-west-2
+        graylog_backup_mosquitto_password: "{{ lookup('aws_ssm', '/home-server/mosquitto-home-assistant-password', region='eu-west-2') }}"
+        graylog_password_secret: "{{ lookup('aws_ssm', '/home-server/graylog-password-secret', region='eu-west-2') }}"
+        graylog_root_password_sha2: "{{ lookup('aws_ssm', '/home-server/graylog-root-password-sha2', region='eu-west-2') }}"
+        graylog_backup_toolkit_private_key: "{{ lookup('aws_ssm', '/home-server/graylog-backup-toolkit-private-key', region='eu-west-2') }}"
+        graylog_backup_toolkit_private_cert: "{{ lookup('aws_ssm', '/home-server/graylog-backup-toolkit-private-cert', region='eu-west-2') }}"
+        graylog_backup_toolkit_ca_cert: "{{ lookup('aws_ssm', '/home-server/graylog-backup-toolkit-ca-cert', region='eu-west-2') }}"

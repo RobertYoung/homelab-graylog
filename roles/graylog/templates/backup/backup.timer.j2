@@ -1,0 +1,8 @@
+[Unit]
+Description=Run {{ graylog_service_name }} backup periodically
+
+[Timer]
+OnCalendar={{ graylog_backup_cron }}
+
+[Install]
+WantedBy=timers.target

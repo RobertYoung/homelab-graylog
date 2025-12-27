@@ -1,0 +1,18 @@
+---
+graylog_service_name: graylog
+graylog_service_version: "6.1"
+graylog_service_port: "443"
+graylog_service_data_dir: /var/lib/graylog
+graylog_service_config_dir: /etc/graylog
+graylog_service_user: graylog
+graylog_service_domain: graylog.local.iamrobertyoung.co.uk
+graylog_service_container_name: graylog
+
+graylog_backup_cron: "*-*-* 04:00:00"
+graylog_backup_image_name: backup-toolkit
+graylog_backup_image_tag: local
+graylog_backup_from: /data
+graylog_backup_mosquitto_host: mosquitto.local.iamrobertyoung.co.uk
+graylog_backup_mosquitto_username: "home-assistant"
+graylog_backup_mosquitto_password: "password"
+graylog_backup_bucket_name: "home-server-backup.iamrobertyoung.co.uk"

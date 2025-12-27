@@ -1,0 +1,106 @@
+---
+- name: Copy dockerfile
+  ansible.builtin.copy:
+    src: files/Dockerfile
+    dest: /tmp/Dockerfile
+    mode: "0644"
+  register: graylog_dockerfile_copy
+
+- name: Create backup script
+  become: true
+  ansible.builtin.copy:
+    src: "files/backup.sh"
+    dest: "/tmp/backup.sh"
+    mode: "0644"
+  register: graylog_backup_script_copy
+
+- name: Create backup-toolkit directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ graylog_service_config_dir }}/backup-toolkit"
+    state: directory
+    mode: "0755"
+    owner: "{{ graylog_service_user }}"
+    group: "{{ graylog_service_user }}"
+
+- name: Create private key from variable
+  become: true
+  ansible.builtin.copy:
+    content: "{{ graylog_backup_toolkit_private_key }}"
+    dest: "{{ graylog_service_config_dir }}/backup-toolkit/private.key"
+    mode: "0400"
+    owner: "{{ graylog_service_user }}"
+    group: "{{ graylog_service_user }}"
+
+- name: Create private certificate from variable
+  become: true
+  ansible.builtin.copy:
+    content: "{{ graylog_backup_toolkit_private_cert }}"
+    dest: "{{ graylog_service_config_dir }}/backup-toolkit/private.crt"
+    mode: "0400"
+    owner: "{{ graylog_service_user }}"
+    group: "{{ graylog_service_user }}"
+
+- name: Create CA certificate from variable
+  become: true
+  ansible.builtin.copy:
+    content: "{{ graylog_backup_toolkit_ca_cert }}"
+    dest: "{{ graylog_service_config_dir }}/backup-toolkit/ca.crt"
+    mode: "0400"
+    owner: "{{ graylog_service_user }}"
+    group: "{{ graylog_service_user }}"
+
+- name: Build Docker image
+  become: true
+  community.docker.docker_image:
+    name: "{{ graylog_backup_image_name }}"
+    tag: "{{ graylog_backup_image_tag }}"
+    source: build
+    push: false
+    build:
+      path: /tmp
+    force_source: "{{ graylog_dockerfile_copy.changed or graylog_backup_script_copy.changed }}"
+    state: present
+  notify: "Restart {{ graylog_service_name }}"
+
+- name: Create backup .env file
+  become: true
+  ansible.builtin.template:
+    src: templates/docker-compose/backup-toolkit.env.j2
+    dest: "{{ graylog_service_config_dir }}/backup-toolkit.env"
+    group: "{{ graylog_service_user }}"
+    owner: "{{ graylog_service_user }}"
+    mode: "0400"
+  notify: "Restart {{ graylog_service_name }}"
+
+- name: Create graylog backup systemd service file
+  become: true
+  ansible.builtin.template:
+    src: "templates/backup/backup.service.j2"
+    dest: /etc/systemd/system/{{ graylog_service_name }}-backup.service
+    owner: root
+    mode: "0644"
+  register: graylog_backup_service
+
+- name: Create graylog backup systemd timer file
+  become: true
+  ansible.builtin.template:
+    src: "templates/backup/backup.timer.j2"
+    dest: /etc/systemd/system/{{ graylog_service_name }}-backup.timer
+    owner: root
+    mode: "0644"
+  register: graylog_backup_timer
+
+- name: Reload systemd daemon
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: graylog_backup_service.changed or graylog_backup_timer.changed
+
+- name: Enable and start graylog backup timer
+  become: true
+  ansible.builtin.systemd:
+    name: "{{ graylog_service_name }}-backup.timer"
+    enabled: true
+    state: started
+  when: graylog_backup_service.changed or graylog_backup_timer.changed
