@@ -1,0 +1,8 @@
+tls:
+  certificates:
+    - certFile: /certs/{{ graylog_service_domain }}.crt
+      keyFile: /certs/{{ graylog_service_domain }}.pem
+  options:
+    default:
+      minVersion: VersionTLS12
+      sniStrict: true

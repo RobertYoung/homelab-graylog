@@ -1,0 +1,45 @@
+---
+- name: Create traefik config directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ graylog_traefik_config_dir }}"
+    state: directory
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Create traefik dynamic config directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ graylog_traefik_config_dir }}/dynamic"
+    state: directory
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Deploy traefik static config
+  become: true
+  ansible.builtin.template:
+    src: traefik/traefik.yml.j2
+    dest: "{{ graylog_traefik_config_dir }}/traefik.yml"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy traefik TLS dynamic config
+  become: true
+  ansible.builtin.template:
+    src: traefik/dynamic/tls.yml.j2
+    dest: "{{ graylog_traefik_config_dir }}/dynamic/tls.yml"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy traefik services dynamic config
+  become: true
+  ansible.builtin.template:
+    src: traefik/dynamic/services.yml.j2
+    dest: "{{ graylog_traefik_config_dir }}/dynamic/services.yml"
+    owner: root
+    group: root
+    mode: "0644"

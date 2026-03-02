@@ -8,6 +8,15 @@
   tags:
     - always
 
+- name: Setup traefik
+  ansible.builtin.include_tasks:
+    file: traefik.yml
+    apply:
+      tags:
+        - traefik
+  tags:
+    - always
+
 - name: Setup graylog
   ansible.builtin.include_tasks:
     file: graylog.yml

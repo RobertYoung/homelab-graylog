@@ -2,7 +2,7 @@
 - name: Graylog configuration
   hosts: graylog
   vars:
-    hostname: influxdb
+    hostname: graylog
     domain: local.iamrobertyoung.co.uk
     fqdn: "{{ hostname }}.{{ domain }}"
   roles:
@@ -40,17 +40,14 @@
       tags: [step-ca-client]
       vars:
         step_ca_client_provisioner_password: "{{ lookup('aws_ssm', '/home-server/step-ca-ansible-password', region='eu-west-2') }}"
+        step_ca_client_post_renew_commands:
+          - "mkdir -p /etc/graylog/certs"
+          - "cp /etc/ssl/certs/{{ fqdn }}.crt /etc/graylog/certs/"
+          - "cp /etc/ssl/private/{{ fqdn }}.pem /etc/graylog/certs/"
+          - "docker kill --signal=HUP traefik || echo 'Traefik not running, skipping HUP signal'"
 
     - role: wazuh-agent
       tags: [wazuh-agent]
-
-    - role: certbot
-      tags: [certbot]
-      vars:
-        certbot_domain: "{{ fqdn }}"
-        certbot_aws_access_key: "{{ lookup('aws_ssm', '/home-server/certbot-access-key', region='eu-west-2') }}"
-        certbot_aws_secret_access_key: "{{ lookup('aws_ssm', '/home-server/certbot-secret-access-key', region='eu-west-2') }}"
-        certbot_deploy_hook_script: "../roles/graylog/files/certbot/deploy-hook.sh"
 
     - role: graylog
       tags: [graylog]

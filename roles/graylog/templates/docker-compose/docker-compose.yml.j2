@@ -43,6 +43,19 @@ services:
       - "./datanode.conf:/etc/graylog/datanode/datanode.conf"
     restart: "on-failure"
 
+  traefik:
+    image: traefik:v3.6
+    container_name: traefik
+    ports:
+      - "{{ graylog_service_port }}:443"
+    volumes:
+      - {{ graylog_traefik_config_dir }}/traefik.yml:/etc/traefik/traefik.yml:ro
+      - {{ graylog_traefik_config_dir }}/dynamic:/etc/traefik/dynamic:ro
+      - {{ graylog_service_config_dir }}/certs:/certs:ro
+    restart: unless-stopped
+    networks:
+      - graylog
+
   # Graylog: https://hub.docker.com/r/graylog/graylog-enterprise
   graylog:
     hostname: "graylog.local.iamrobertyoung.co.uk"
@@ -62,8 +75,6 @@ services:
     - "5140:5140/tcp"   # Syslog
     - "5555:5555/tcp"   # RAW TCP
     - "5555:5555/udp"   # RAW UDP
-    - "{{ graylog_service_port }}:9000/tcp"   # Server API
-    - "9000:9000/tcp"   # Server API
     - "12201:12201/tcp" # GELF TCP
     - "12201:12201/udp" # GELF UDP
     #- "10000:10000/tcp" # Custom TCP port
@@ -75,8 +86,6 @@ services:
     volumes:
       - "graylog_data:/usr/share/graylog/data/data"
       - "./graylog.conf:/usr/share/graylog/data/config/graylog.conf"
-      - /etc/letsencrypt:/etc/letsencrypt
-      - /root/.step/certs/root_ca.crt:/etc/ssl/certs/iamrobertyoung_root_ca.crt
     restart: "on-failure"
 
 
