@@ -1,0 +1,14 @@
+http:
+  routers:
+    graylog:
+      rule: "Host(`{{ graylog_service_domain }}`)"
+      entrypoints:
+        - websecure
+      service: graylog
+      tls: {}
+
+  services:
+    graylog:
+      loadBalancer:
+        servers:
+          - url: "http://graylog:9000"

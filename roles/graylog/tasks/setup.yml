@@ -25,6 +25,35 @@
     owner: "{{ graylog_service_user }}"
     group: "{{ graylog_service_user }}"
 
+- name: Create certs directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ graylog_service_config_dir }}/certs"
+    state: directory
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Copy TLS certificate into certs directory
+  become: true
+  ansible.builtin.copy:
+    src: "/etc/ssl/certs/{{ graylog_service_domain }}.crt"
+    dest: "{{ graylog_service_config_dir }}/certs/{{ graylog_service_domain }}.crt"
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Copy TLS key into certs directory
+  become: true
+  ansible.builtin.copy:
+    src: "/etc/ssl/private/{{ graylog_service_domain }}.pem"
+    dest: "{{ graylog_service_config_dir }}/certs/{{ graylog_service_domain }}.pem"
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0600"
+
 - name: Add graylog service user to docker group
   become: true
   ansible.builtin.user:
