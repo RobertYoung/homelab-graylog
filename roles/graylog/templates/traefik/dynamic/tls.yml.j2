@@ -6,3 +6,10 @@ tls:
     default:
       minVersion: VersionTLS12
       sniStrict: true
+    syslog-mtls:
+      minVersion: VersionTLS12
+      sniStrict: true
+      clientAuth:
+        caFiles:
+          - /certs/iamrobertyoung_root_ca.crt
+        clientAuthType: RequireAndVerifyClientCert

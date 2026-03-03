@@ -54,6 +54,16 @@
     group: root
     mode: "0600"
 
+- name: Copy client auth CA cert into certs directory
+  become: true
+  ansible.builtin.copy:
+    src: "/root/.step/certs/root_ca.crt"
+    dest: "{{ graylog_service_config_dir }}/certs/iamrobertyoung_root_ca.crt"
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0644"
+
 - name: Add graylog service user to docker group
   become: true
   ansible.builtin.user:

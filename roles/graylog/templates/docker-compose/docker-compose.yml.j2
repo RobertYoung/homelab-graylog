@@ -48,6 +48,7 @@ services:
     container_name: traefik
     ports:
       - "{{ graylog_service_port }}:443"
+      - "5140:5140"
     volumes:
       - {{ graylog_traefik_config_dir }}/traefik.yml:/etc/traefik/traefik.yml:ro
       - {{ graylog_traefik_config_dir }}/dynamic:/etc/traefik/dynamic:ro
@@ -72,7 +73,6 @@ services:
     ports:
     - "5044:5044/tcp"   # Beats
     - "5140:5140/udp"   # Syslog
-    - "5140:5140/tcp"   # Syslog
     - "5555:5555/tcp"   # RAW TCP
     - "5555:5555/udp"   # RAW UDP
     - "12201:12201/tcp" # GELF TCP

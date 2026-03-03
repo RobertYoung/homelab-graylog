@@ -12,3 +12,19 @@ http:
       loadBalancer:
         servers:
           - url: "http://graylog:9000"
+
+tcp:
+  routers:
+    syslog-tls:
+      rule: "HostSNI(`{{ graylog_service_domain }}`)"
+      entrypoints:
+        - syslogtcp
+      service: syslog
+      tls:
+        options: syslog-mtls
+
+  services:
+    syslog:
+      loadBalancer:
+        servers:
+          - address: "graylog:5140"
