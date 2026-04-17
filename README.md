@@ -28,7 +28,7 @@ Ansible project for deploying [Graylog](https://graylog.org/) via Docker Compose
 
 - Ansible installed (see `mise.toml` for version)
 - SSH access to the target host
-- AWS credentials via aws-vault for SSM parameter access (region: eu-west-2)
+- AWS credentials via aws-vault for SSM parameter access (region: eu-west-1)
 
 ## Setup
 
@@ -90,7 +90,7 @@ Run specific parts of the playbook:
 
 ## Secrets
 
-Secrets are stored in AWS SSM Parameter Store (eu-west-2) and retrieved via `lookup('aws_ssm', ...)`.
+Secrets are stored in AWS SSM Parameter Store (eu-west-1, `/homelab/*` namespace) and retrieved via `lookup('aws_ssm', ...)`. Graylog-specific parameters are provisioned by Terraform — see `terraform/README.md`.
 
 ## Adding Roles
 
