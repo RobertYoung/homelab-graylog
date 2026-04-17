@@ -55,8 +55,9 @@ Key directories on target host:
 - `/etc/graylog/certs` - TLS certificates
 
 ### Secrets Management
-Secrets are stored in AWS SSM Parameter Store (region: eu-west-2).
-Ansible retrieves them via `lookup('aws_ssm', '/path/to/secret', region='eu-west-2')`.
+Secrets are stored in AWS SSM Parameter Store (region: eu-west-1) under the `/homelab/*` namespace.
+Ansible retrieves them via `lookup('aws_ssm', '/homelab/...', region='eu-west-1')`.
+The graylog-specific parameters (`/homelab/graylog/*`) are provisioned by the Terraform config in `terraform/`.
 
 ### External Dependencies
 Dependencies in `requirements.yml` are installed to `.roles/` (gitignored). External roles use SSH git URLs requiring SSH keys.

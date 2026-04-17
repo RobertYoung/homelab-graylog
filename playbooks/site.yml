@@ -33,13 +33,13 @@
         telegraf_influxdb_url: "https://influxdb.{{ domain }}"
         telegraf_influxdb_port: 8086
         telegraf_influxdb_organisation: "0dd8df669872ba9e"
-        telegraf_influxdb_token: "{{ lookup('aws_ssm', '/home-server/influxdb-token', region='eu-west-2') }}"
+        telegraf_influxdb_token: "{{ lookup('aws_ssm', '/homelab/influxdb/token', region='eu-west-1') }}"
         telegraf_influxdb_bucket: "home-server"
 
     - role: step-ca-client
       tags: [step-ca-client]
       vars:
-        step_ca_client_provisioner_password: "{{ lookup('aws_ssm', '/home-server/step-ca-ansible-password', region='eu-west-2') }}"
+        step_ca_client_provisioner_password: "{{ lookup('aws_ssm', '/homelab/step-ca/ansible-password', region='eu-west-1') }}"
         step_ca_client_post_renew_commands:
           - "mkdir -p /etc/graylog/certs"
           - "cp /etc/ssl/certs/{{ fqdn }}.crt /etc/graylog/certs/"
@@ -52,12 +52,12 @@
     - role: graylog
       tags: [graylog]
       vars:
-        graylog_backup_aws_access_key: "{{ lookup('aws_ssm', '/home-server/access-key', region='eu-west-2') }}"
-        graylog_backup_aws_secret_access_key: "{{ lookup('aws_ssm', '/home-server/secret-access-key', region='eu-west-2') }}"
+        graylog_backup_aws_access_key: "{{ lookup('aws_ssm', '/homelab/aws/access-key', region='eu-west-1') }}"
+        graylog_backup_aws_secret_access_key: "{{ lookup('aws_ssm', '/homelab/aws/secret-access-key', region='eu-west-1') }}"
         graylog_backup_aws_region: eu-west-2
-        graylog_backup_mosquitto_password: "{{ lookup('aws_ssm', '/home-server/mosquitto-home-assistant-password', region='eu-west-2') }}"
-        graylog_password_secret: "{{ lookup('aws_ssm', '/home-server/graylog-password-secret', region='eu-west-2') }}"
-        graylog_root_password_sha2: "{{ lookup('aws_ssm', '/home-server/graylog-root-password-sha2', region='eu-west-2') }}"
-        graylog_backup_toolkit_private_key: "{{ lookup('aws_ssm', '/home-server/graylog-backup-toolkit-private-key', region='eu-west-2') }}"
-        graylog_backup_toolkit_private_cert: "{{ lookup('aws_ssm', '/home-server/graylog-backup-toolkit-private-cert', region='eu-west-2') }}"
-        graylog_backup_toolkit_ca_cert: "{{ lookup('aws_ssm', '/home-server/graylog-backup-toolkit-ca-cert', region='eu-west-2') }}"
+        graylog_backup_mosquitto_password: "{{ lookup('aws_ssm', '/homelab/mosquitto/home-assistant-password', region='eu-west-1') }}"
+        graylog_password_secret: "{{ lookup('aws_ssm', '/homelab/graylog/password-secret', region='eu-west-1') }}"
+        graylog_root_password_sha2: "{{ lookup('aws_ssm', '/homelab/graylog/root-password-sha2', region='eu-west-1') }}"
+        graylog_backup_toolkit_private_key: "{{ lookup('aws_ssm', '/homelab/graylog/backup-toolkit/private-key', region='eu-west-1') }}"
+        graylog_backup_toolkit_private_cert: "{{ lookup('aws_ssm', '/homelab/graylog/backup-toolkit/private-cert', region='eu-west-1') }}"
+        graylog_backup_toolkit_ca_cert: "{{ lookup('aws_ssm', '/homelab/graylog/backup-toolkit/ca-cert', region='eu-west-1') }}"
